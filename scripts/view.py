@@ -15,9 +15,11 @@ def main() -> None:
         raise FileNotFoundError(f"STL not found: {args.stl}")
 
     from vtkmodules.vtkIOGeometry import vtkSTLReader
+    import vtkmodules.vtkInteractionStyle  # noqa: F401
     # Importing the backend registers the graphical X/OpenGL render window.
     # Without it, VTK can construct a non-graphical base window that exits at once.
     import vtkmodules.vtkRenderingOpenGL2  # noqa: F401
+    from vtkmodules.vtkInteractionStyle import vtkInteractorStyleTrackballCamera
     from vtkmodules.vtkRenderingCore import vtkActor, vtkPolyDataMapper, vtkRenderer, vtkRenderWindow, vtkRenderWindowInteractor
 
     reader = vtkSTLReader()
@@ -41,11 +43,12 @@ def main() -> None:
     window.AddRenderer(renderer)
     interactor = vtkRenderWindowInteractor()
     interactor.SetRenderWindow(window)
+    interactor.SetInteractorStyle(vtkInteractorStyleTrackballCamera())
     renderer.ResetCamera()
     window.Render()
     interactor.Initialize()
     print(f"Opening STL viewer: {args.stl.resolve()}")
-    print("Controls: drag to rotate; mouse wheel to zoom; shift-drag to pan. Close the window to exit.")
+    print("Controls: left-drag to rotate; middle-drag or shift-left-drag to pan; mouse wheel to zoom. Close the window to exit.")
     interactor.Start()
 
 
