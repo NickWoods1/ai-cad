@@ -123,11 +123,13 @@ def main() -> None:
     staging_dir.mkdir(parents=True)
     step_path = staging_dir / "part.step"
     stl_path = staging_dir / "part.stl"
+    # Capture exact BREP dimensions before STL export.  The tessellation export
+    # can slightly alter CadQuery's in-memory bounding-box cache.
+    source_box = model.val().BoundingBox()
     cq.exporters.export(model, str(step_path))
     cq.exporters.export(model, str(stl_path), tolerance=0.05, angularTolerance=0.1)
 
     imported_step = cq.importers.importStep(str(step_path))
-    source_box = model.val().BoundingBox()
     imported_box = imported_step.val().BoundingBox()
     tolerance = getattr(parameters, "DIMENSION_TOLERANCE", 0.01)
     for axis in ("xlen", "ylen", "zlen"):

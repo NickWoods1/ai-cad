@@ -5,13 +5,9 @@ from __future__ import annotations
 import cadquery as cq
 
 from parameters import (
-    BADGE_SIZE,
     BODY_DEPTH,
     BODY_HEIGHT,
     BODY_WIDTH,
-    DETAIL_BAND_HEIGHT,
-    DETAIL_BAND_SPACING,
-    DETAIL_RECESS_DEPTH,
     FRONT_FLAP_CENTER_Z,
     FRONT_FLAP_HEIGHT,
     FRONT_FLAP_THICKNESS,
@@ -28,6 +24,12 @@ from parameters import (
     STRAP_WIDTH,
     STRAP_X_OFFSET,
     VERTICAL_CORNER_RADIUS,
+    WORDMARK_CENTER_Z,
+    WORDMARK_FONT,
+    WORDMARK_FONT_SIZE,
+    WORDMARK_FUSION_OVERLAP,
+    WORDMARK_TEXT,
+    WORDMARK_THICKNESS,
 )
 
 
@@ -57,24 +59,23 @@ def build_model() -> cq.Workplane:
     )
     bag = body.union(flap)
 
-    # Recessed horizontal bands and a diamond badge make a graphic front panel
-    # without copying a delivery company logo.
+    # Raised branded wordmark. Its small overlap embeds it in the flap instead
+    # of merely touching the face, producing one robust printable solid.
     front_outer_y = front_y - FRONT_FLAP_THICKNESS / 2.0
-    detail_y = front_outer_y + DETAIL_RECESS_DEPTH / 2.0
-    for z_offset in (-DETAIL_BAND_SPACING / 2.0, DETAIL_BAND_SPACING / 2.0):
-        band = box_at(
-            FRONT_FLAP_WIDTH * 0.62,
-            DETAIL_RECESS_DEPTH,
-            DETAIL_BAND_HEIGHT,
-            0,
-            detail_y,
-            FRONT_FLAP_CENTER_Z + z_offset,
+    wordmark = (
+        cq.Workplane("XZ")
+        .text(
+            WORDMARK_TEXT,
+            WORDMARK_FONT_SIZE,
+            WORDMARK_THICKNESS,
+            font=WORDMARK_FONT,
+            kind="bold",
+            halign="center",
+            valign="center",
         )
-        bag = bag.cut(band)
-
-    badge = box_at(BADGE_SIZE, DETAIL_RECESS_DEPTH, BADGE_SIZE, 0, detail_y, FRONT_FLAP_CENTER_Z + 21.0)
-    badge = badge.rotate((0, 0, 0), (0, 1, 0), 45)
-    bag = bag.cut(badge)
+        .translate((0, front_outer_y + WORDMARK_FUSION_OVERLAP, WORDMARK_CENTER_Z))
+    )
+    bag = bag.union(wordmark)
 
     # These raised rear straps and crossbar are fused cosmetic details.  They
     # give the reverse side a wearable-rider backpack character.

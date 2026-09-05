@@ -17,11 +17,14 @@ FRONT_FLAP_THICKNESS = 2.5
 FRONT_FLAP_HEIGHT = 54.0
 FRONT_FLAP_CENTER_Z = 43.0
 
-# Shallow details are intentionally cosmetic rather than functional.
-DETAIL_RECESS_DEPTH = 0.8
-DETAIL_BAND_HEIGHT = 2.0
-DETAIL_BAND_SPACING = 8.0
-BADGE_SIZE = 13.0
+# Raised front branding is deliberate geometry, so it is visible on the STL
+# and can be colour-swapped during printing.
+WORDMARK_TEXT = "DOORDASH"
+WORDMARK_FONT = "DejaVu Sans"
+WORDMARK_FONT_SIZE = 7.5
+WORDMARK_THICKNESS = 0.9
+WORDMARK_CENTER_Z = 42.0
+WORDMARK_FUSION_OVERLAP = FUSION_OVERLAP
 
 # Rear straps are fused to the body so that the model remains one solid.
 STRAP_WIDTH = 6.0
@@ -38,7 +41,7 @@ HANDLE_DEPTH = 10.0
 HANDLE_HEIGHT = 8.0
 
 EXPECTED_SOLID_COUNT = 1
-# The front flap and raised rear straps both extend beyond the main body.
-EXPECTED_OVERALL_DEPTH = BODY_DEPTH + FRONT_FLAP_THICKNESS + STRAP_THICKNESS - (2.0 * FUSION_OVERLAP)
+# The wordmark extends 0.5 mm beyond the front flap. It is the foremost feature.
+EXPECTED_OVERALL_DEPTH = BODY_DEPTH + FRONT_FLAP_THICKNESS + STRAP_THICKNESS - (2.0 * FUSION_OVERLAP) + (WORDMARK_THICKNESS - WORDMARK_FUSION_OVERLAP)
 EXPECTED_OVERALL_HEIGHT = BODY_HEIGHT + HANDLE_HEIGHT - FUSION_OVERLAP
 DIMENSION_TOLERANCE = 0.01

@@ -2,9 +2,9 @@
 
 ## Purpose
 
-A generic, closed miniature delivery backpack for decorative 3D printing. It
-is inspired by the insulated bags worn by bicycle couriers, but intentionally
-does not reproduce DoorDash trademarks, logos, or artwork.
+A closed miniature DoorDash-style insulated delivery backpack for decorative
+3D printing. Its front carries raised `DOORDASH` lettering, fused into the
+front flap rather than applied as a paint texture.
 
 ## Exact design dimensions
 
@@ -23,10 +23,10 @@ does not reproduce DoorDash trademarks, logos, or artwork.
 ## Inferred / stylistic decisions
 
 - The closed rectangular insulated-bag form, flap proportions, rear straps,
-  diamond badge recess, and two inset front bands are aesthetic choices, not
-  measurements from a particular real bag.
-- Recesses are 0.8 mm deep and raised straps are 1.5 mm thick so they should
-  remain legible on a typical FDM print.
+  handle, and wordmark placement are aesthetic choices rather than measured
+  dimensions from a particular real bag.
+- The raised wordmark is 0.9 mm thick with 0.4 mm embedded in the flap; it
+  therefore projects 0.5 mm. Rear straps are 1.5 mm thick.
 
 ## Print notes
 
