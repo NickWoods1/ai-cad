@@ -1,4 +1,4 @@
-"""CadQuery model for a faceted aero-tech coffee mug."""
+"""CadQuery model for an American Art Deco coffee mug."""
 
 from __future__ import annotations
 
@@ -8,17 +8,16 @@ from parameters import (
     BASE_OUTER_RADIUS,
     BASE_THICKNESS,
     BODY_HEIGHT,
-    CUFF_HEIGHT,
-    CUFF_INNER_DIAMETER,
-    CUFF_OUTER_DIAMETER,
-    CUFF_SIDES,
-    FIN_ANGLE,
-    FIN_CENTER_Z,
-    FIN_COUNT,
-    FIN_DEPTH,
-    FIN_HEIGHT,
-    FIN_WIDTH,
-    FIN_X_SPACING,
+    CROWN_BOTTOM_Z,
+    CROWN_HEIGHT,
+    CROWN_INNER_RADIUS,
+    CROWN_OUTER_DIAMETER,
+    FLUTE_CENTER_RADIUS,
+    FLUTE_CENTER_Z,
+    FLUTE_COUNT,
+    FLUTE_DEPTH,
+    FLUTE_HEIGHT,
+    FLUTE_WIDTH,
     HANDLE_CENTER_X,
     HANDLE_CENTER_Z,
     HANDLE_CORNER_RADIUS,
@@ -27,7 +26,15 @@ from parameters import (
     HANDLE_OUTER_DEPTH,
     HANDLE_OUTER_HEIGHT,
     HANDLE_OUTER_WIDTH,
+    LOWER_TIER_HEIGHT,
+    LOWER_TIER_OUTER_DIAMETER,
+    MIDDLE_TIER_HEIGHT,
+    MIDDLE_TIER_OUTER_DIAMETER,
+    TIER_INNER_RADIUS,
+    TIER_SIDES,
     TOP_OUTER_RADIUS,
+    UPPER_TIER_HEIGHT,
+    UPPER_TIER_OUTER_DIAMETER,
     WALL_THICKNESS,
 )
 
@@ -37,8 +44,15 @@ def box_at(width: float, depth: float, height: float, center_x: float, center_y:
     return cq.Workplane("XY").box(width, depth, height).translate((center_x, center_y, center_z))
 
 
+def octagonal_band(outer_diameter: float, inner_radius: float, height: float, bottom_z: float) -> cq.Workplane:
+    """Create a hollow octagonal band at the requested height."""
+    outer = cq.Workplane("XY").polygon(TIER_SIDES, outer_diameter).extrude(height).translate((0, 0, bottom_z))
+    inner = cq.Workplane("XY").circle(inner_radius).extrude(height).translate((0, 0, bottom_z))
+    return outer.cut(inner)
+
+
 def build_model() -> cq.Workplane:
-    """Return a hollow, single-solid mug centred in X/Y with base at Z=0."""
+    """Return a hollow, single-solid Art Deco mug centred in X/Y with base at Z=0."""
     outer_cup = (
         cq.Workplane("XY")
         .circle(BASE_OUTER_RADIUS)
@@ -56,21 +70,25 @@ def build_model() -> cq.Workplane:
     )
     mug = outer_cup.cut(inner_cup)
 
-    # A wide octagonal cuff gives the lower half a protective, technical
-    # silhouette while the round cup remains comfortable to hold.
-    cuff_outer = cq.Workplane("XY").polygon(CUFF_SIDES, CUFF_OUTER_DIAMETER).extrude(CUFF_HEIGHT)
-    cuff_inner = cq.Workplane("XY").polygon(CUFF_SIDES, CUFF_INNER_DIAMETER).extrude(CUFF_HEIGHT)
-    mug = mug.union(cuff_outer.cut(cuff_inner))
+    # Stepped lower plinth: an Art Deco architectural silhouette which leaves
+    # the drinking cavity unobstructed.
+    lower_bottom = 0.0
+    middle_bottom = lower_bottom + LOWER_TIER_HEIGHT
+    upper_bottom = middle_bottom + MIDDLE_TIER_HEIGHT
+    mug = mug.union(octagonal_band(LOWER_TIER_OUTER_DIAMETER, TIER_INNER_RADIUS, LOWER_TIER_HEIGHT, lower_bottom))
+    mug = mug.union(octagonal_band(MIDDLE_TIER_OUTER_DIAMETER, TIER_INNER_RADIUS, MIDDLE_TIER_HEIGHT, middle_bottom))
+    mug = mug.union(octagonal_band(UPPER_TIER_OUTER_DIAMETER, TIER_INNER_RADIUS, UPPER_TIER_HEIGHT, upper_bottom))
+    mug = mug.union(octagonal_band(CROWN_OUTER_DIAMETER, CROWN_INNER_RADIUS, CROWN_HEIGHT, CROWN_BOTTOM_Z))
 
-    # Three diagonal front fins make a deliberate wraparound-sportswear style
-    # visual grip. Their rear faces overlap the cuff for a robust union.
-    fin_x_positions = [FIN_X_SPACING * (index - (FIN_COUNT - 1) / 2.0) for index in range(FIN_COUNT)]
-    for x in fin_x_positions:
-        fin = box_at(FIN_WIDTH, FIN_DEPTH, FIN_HEIGHT, x, -CUFF_OUTER_DIAMETER / 2.0 + FIN_DEPTH / 2.0, FIN_CENTER_Z)
-        mug = mug.union(fin.rotate((x, -CUFF_OUTER_DIAMETER / 2.0 + FIN_DEPTH / 2.0, FIN_CENTER_Z), (x, -CUFF_OUTER_DIAMETER / 2.0 + FIN_DEPTH / 2.0 + 1.0, FIN_CENTER_Z), FIN_ANGLE))
+    # Slender raised flutes provide the vertical, sunburst-like rhythm of an
+    # American Art Deco facade. Each overlaps the cup's curved wall.
+    for index in range(FLUTE_COUNT):
+        angle = index * 360.0 / FLUTE_COUNT
+        flute = box_at(FLUTE_WIDTH, FLUTE_DEPTH, FLUTE_HEIGHT, 0, -FLUTE_CENTER_RADIUS, FLUTE_CENTER_Z)
+        mug = mug.union(flute.rotate((0, 0, 0), (0, 0, 1), angle))
 
-    # The handle is a rounded rectangular ring, deliberately angular rather
-    # than a conventional circular ear. It overlaps the cup at its left side.
+    # A rectangular ring with modest corner rounding continues the stepped,
+    # architectural theme while preserving a generous finger opening.
     handle_outer = box_at(
         HANDLE_OUTER_WIDTH,
         HANDLE_OUTER_DEPTH,

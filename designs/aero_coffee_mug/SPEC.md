@@ -1,32 +1,32 @@
-# Aero coffee mug
+# American Art Deco coffee mug
 
 ## Purpose
 
-A 3D-printable, hollow coffee-mug design with a technical sportswear-inspired
-look: a tapered round cup, eight-sided lower armour cuff, diagonal grip fins,
-and an angular wraparound handle. It is inspired by the general visual language
-of high-performance eyewear, not by any Oakley logo or product design.
+A hollow 3D-printable coffee mug styled after American Art Deco architecture:
+three stepped octagonal base bands, a matching crown band, repeated vertical
+flutes, and a sharply proportioned rectangular handle.
 
 ## Exact design dimensions
 
 - Cup body: 95 mm tall; 78 mm outside diameter at its base; 88 mm outside
   diameter at its rim.
 - Wall thickness: 3.2 mm. Base thickness: 5 mm.
-- Faceted lower cuff: 94 mm across, 26 mm high.
-- Handle opening: 20 mm wide × 38 mm high.
-- Finished envelope: 124.2 mm wide × 94 mm deep × 95 mm high.
+- Stepped lower bands: 90 mm, 86 mm, and 82 mm across; 5 mm, 5 mm, and 4 mm
+  high respectively.
+- Crown band: 91 mm across and 4 mm high, beginning 82 mm above the base.
+- Handle opening: 18 mm wide × 40 mm high.
+- Finished envelope: 120.7 mm wide × 91 mm deep × 95 mm high.
 
 ## Derived dimensions
 
 - The internal taper follows the outer taper at the named wall thickness.
-- The three front fins are evenly spaced about the cup centreline.
-- The handle is positioned from the rim radius and its named fusion overlap.
+- Twelve flutes are distributed at 30° intervals around the mug centreline.
+- The handle position follows the rim radius and its named fusion overlap.
 
 ## Inferred / stylistic choices
 
-- The octagonal cuff, 7 mm-deep diagonal fins, 25° fin angle, and squared
-  rounded handle are visual choices rather than measurements from an existing
-  product.
+- The stepped octagons, crown, flute count, and angular handle are aesthetic
+  choices rather than measurements from an existing mug.
 - The approximately 425 ml cavity estimate is geometric, not a fill-to-brim or
   certified beverage capacity.
 
@@ -36,5 +36,5 @@ of high-performance eyewear, not by any Oakley logo or product design.
   FDM print is not automatically food-safe or reliably watertight; material,
   nozzle, sealing, and cleaning decisions determine whether it is suitable for
   drinking use.
-- Print upright on the flat base. The handle is self-supporting only to the
-  extent allowed by your printer's bridge settings; inspect it in the slicer.
+- Print upright on the flat base. Inspect the handle in your slicer to confirm
+  it suits your printer's bridge settings.
