@@ -88,6 +88,27 @@ def validate_mini_delivery_bag(model: cq.Workplane, parameters) -> list[str]:
     return ["valid solid", "one solid", "finished outer dimensions"]
 
 
+def validate_aero_coffee_mug(model: cq.Workplane, parameters) -> list[str]:
+    """Validate the finished envelope and one-piece construction of the mug."""
+    solid = model.val()
+    if not solid.isValid():
+        raise ValueError("CadQuery produced an invalid solid")
+    solids = model.solids().vals()
+    if len(solids) != parameters.EXPECTED_SOLID_COUNT:
+        raise ValueError(f"Expected {parameters.EXPECTED_SOLID_COUNT} solid, found {len(solids)}")
+
+    box = solid.BoundingBox()
+    checks = {
+        "X finished width": (box.xlen, parameters.EXPECTED_OVERALL_WIDTH),
+        "Y finished depth": (box.ylen, parameters.EXPECTED_OVERALL_DEPTH),
+        "Z finished height": (box.zlen, parameters.EXPECTED_OVERALL_HEIGHT),
+    }
+    for name, (actual, expected) in checks.items():
+        if not nearly_equal(actual, expected, parameters.DIMENSION_TOLERANCE):
+            raise ValueError(f"{name} is {actual:.4f} mm; expected {expected:.4f} mm")
+    return ["valid solid", "one solid", "finished outer dimensions"]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("design", help="Directory name under designs/")
@@ -110,6 +131,8 @@ def main() -> None:
         results = validate_test_plate(model, parameters)
     elif args.design == "mini_delivery_bag":
         results = validate_mini_delivery_bag(model, parameters)
+    elif args.design == "aero_coffee_mug":
+        results = validate_aero_coffee_mug(model, parameters)
     else:
         solid = model.val()
         if not solid.isValid() or len(model.solids().vals()) != 1:
