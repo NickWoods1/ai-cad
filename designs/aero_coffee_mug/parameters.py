@@ -1,50 +1,55 @@
-"""Named dimensions for the American Art Deco coffee mug, in millimetres."""
+"""Named dimensions for the soft geometric Art Deco coffee mug, in millimetres."""
 
-# Cup envelope and drinking cavity. The nominal internal volume is about
-# 425 ml before accounting for practical fill height; it is not calibrated.
+# Primary body and drinking cavity.
 BODY_HEIGHT = 95.0
-BASE_OUTER_RADIUS = 39.0
-TOP_OUTER_RADIUS = 44.0
-WALL_THICKNESS = 3.2
 BASE_THICKNESS = 5.0
+NOMINAL_WALL_THICKNESS = 3.2
+CAVITY_TOP_EXTENSION = 1.0
 
-# Three stepped octagonal architectural bands around the lower body.
-TIER_SIDES = 8
-TIER_INNER_RADIUS = 36.5
-LOWER_TIER_OUTER_DIAMETER = 90.0
-LOWER_TIER_HEIGHT = 5.0
-MIDDLE_TIER_OUTER_DIAMETER = 86.0
-MIDDLE_TIER_HEIGHT = 5.0
-UPPER_TIER_OUTER_DIAMETER = 82.0
-UPPER_TIER_HEIGHT = 4.0
+# Each section is (height Z, half-width, superellipse exponent). An exponent of
+# 2 is circular; larger values create the soft-square plan that carries the
+# geometric Deco character without applied faceting.
+OUTER_SECTIONS = (
+    (0.0, 40.5, 2.55),
+    (5.0, 41.5, 2.60),
+    (15.0, 40.0, 2.55),
+    (55.0, 40.0, 2.45),
+    (85.0, 43.5, 2.40),
+    (95.0, 42.8, 2.50),
+)
+PROFILE_SAMPLE_COUNT = 64
 
-# A matching crown band terminates the fluted body below the rim.
-CROWN_OUTER_DIAMETER = 91.0
-CROWN_INNER_RADIUS = 40.5
-CROWN_HEIGHT = 4.0
-CROWN_BOTTOM_Z = 82.0
-
-# Vertical flutes make a sunburst-like rhythm around the tapered cup.
-FLUTE_COUNT = 12
-FLUTE_WIDTH = 2.8
-FLUTE_DEPTH = 6.0
-FLUTE_HEIGHT = 64.0
-FLUTE_CENTER_RADIUS = 42.0
-FLUTE_CENTER_Z = 48.0
-
-# Sharply proportioned rectangular Art Deco handle, fused at the right side.
-HANDLE_OUTER_WIDTH = 32.0
-HANDLE_OUTER_DEPTH = 16.0
-HANDLE_OUTER_HEIGHT = 60.0
-HANDLE_INNER_WIDTH = 18.0
-HANDLE_INNER_HEIGHT = 40.0
-HANDLE_CORNER_RADIUS = 2.0
-HANDLE_FUSION_OVERLAP = 0.8
-HANDLE_CENTER_X = TOP_OUTER_RADIUS + HANDLE_OUTER_WIDTH / 2.0 - HANDLE_FUSION_OVERLAP
-HANDLE_CENTER_Z = BODY_HEIGHT / 2.0
+# The handle is a filleted ribbon whose outer and inner boundaries are periodic
+# splines in the X/Z plane. Wide roots overlap the body so the loop grows out of
+# the cup rather than meeting it as a rectangular block.
+HANDLE_DEPTH = 15.0
+HANDLE_EDGE_FILLET = 2.4
+HANDLE_OUTER_XZ = (
+    (33.0, 83.0),
+    (51.0, 84.0),
+    (68.0, 76.0),
+    (76.0, 61.0),
+    (75.0, 43.0),
+    (66.0, 26.0),
+    (50.0, 16.0),
+    (33.0, 19.0),
+)
+HANDLE_INNER_XZ = (
+    (48.0, 72.0),
+    (59.0, 72.0),
+    (67.0, 64.0),
+    (70.0, 52.0),
+    (68.0, 39.0),
+    (60.0, 28.0),
+    (49.0, 25.0),
+    (46.0, 36.0),
+    (46.0, 62.0),
+)
 
 EXPECTED_SOLID_COUNT = 1
-EXPECTED_OVERALL_WIDTH = CROWN_OUTER_DIAMETER / 2.0 + HANDLE_CENTER_X + HANDLE_OUTER_WIDTH / 2.0
-EXPECTED_OVERALL_DEPTH = CROWN_OUTER_DIAMETER
+EXPECTED_OVERALL_WIDTH = 120.4122
+EXPECTED_OVERALL_DEPTH = 87.5175
 EXPECTED_OVERALL_HEIGHT = BODY_HEIGHT
-DIMENSION_TOLERANCE = 0.01
+EXPECTED_MATERIAL_VOLUME = 128238.126
+DIMENSION_TOLERANCE = 0.02
+VOLUME_TOLERANCE = 1.0

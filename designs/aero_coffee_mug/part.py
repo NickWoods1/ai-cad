@@ -1,108 +1,97 @@
-"""CadQuery model for an American Art Deco coffee mug."""
+"""CadQuery model for a soft geometric American Art Deco coffee mug."""
 
 from __future__ import annotations
+
+import math
 
 import cadquery as cq
 
 from parameters import (
-    BASE_OUTER_RADIUS,
     BASE_THICKNESS,
     BODY_HEIGHT,
-    CROWN_BOTTOM_Z,
-    CROWN_HEIGHT,
-    CROWN_INNER_RADIUS,
-    CROWN_OUTER_DIAMETER,
-    FLUTE_CENTER_RADIUS,
-    FLUTE_CENTER_Z,
-    FLUTE_COUNT,
-    FLUTE_DEPTH,
-    FLUTE_HEIGHT,
-    FLUTE_WIDTH,
-    HANDLE_CENTER_X,
-    HANDLE_CENTER_Z,
-    HANDLE_CORNER_RADIUS,
-    HANDLE_INNER_HEIGHT,
-    HANDLE_INNER_WIDTH,
-    HANDLE_OUTER_DEPTH,
-    HANDLE_OUTER_HEIGHT,
-    HANDLE_OUTER_WIDTH,
-    LOWER_TIER_HEIGHT,
-    LOWER_TIER_OUTER_DIAMETER,
-    MIDDLE_TIER_HEIGHT,
-    MIDDLE_TIER_OUTER_DIAMETER,
-    TIER_INNER_RADIUS,
-    TIER_SIDES,
-    TOP_OUTER_RADIUS,
-    UPPER_TIER_HEIGHT,
-    UPPER_TIER_OUTER_DIAMETER,
-    WALL_THICKNESS,
+    CAVITY_TOP_EXTENSION,
+    HANDLE_DEPTH,
+    HANDLE_EDGE_FILLET,
+    HANDLE_INNER_XZ,
+    HANDLE_OUTER_XZ,
+    NOMINAL_WALL_THICKNESS,
+    OUTER_SECTIONS,
+    PROFILE_SAMPLE_COUNT,
 )
 
 
-def box_at(width: float, depth: float, height: float, center_x: float, center_y: float, center_z: float) -> cq.Workplane:
-    """Create an axis-aligned box positioned by its centre."""
-    return cq.Workplane("XY").box(width, depth, height).translate((center_x, center_y, center_z))
+def closed_periodic_spline(points: list[cq.Vector]) -> cq.Wire:
+    """Create a smooth closed wire through the supplied control samples."""
+    edge = cq.Edge.makeSpline(points, periodic=True)
+    return cq.Wire.assembleEdges([edge])
 
 
-def octagonal_band(outer_diameter: float, inner_radius: float, height: float, bottom_z: float) -> cq.Workplane:
-    """Create a hollow octagonal band at the requested height."""
-    outer = cq.Workplane("XY").polygon(TIER_SIDES, outer_diameter).extrude(height).translate((0, 0, bottom_z))
-    inner = cq.Workplane("XY").circle(inner_radius).extrude(height).translate((0, 0, bottom_z))
-    return outer.cut(inner)
+def soft_square_wire(z: float, half_width: float, exponent: float) -> cq.Wire:
+    """Create a symmetric superellipse section in the XY plane."""
+    points = []
+    power = 2.0 / exponent
+    for index in range(PROFILE_SAMPLE_COUNT):
+        angle = 2.0 * math.pi * index / PROFILE_SAMPLE_COUNT
+        cosine = math.cos(angle)
+        sine = math.sin(angle)
+        x = half_width * math.copysign(abs(cosine) ** power, cosine)
+        y = half_width * math.copysign(abs(sine) ** power, sine)
+        points.append(cq.Vector(x, y, z))
+    return closed_periodic_spline(points)
+
+
+def interpolate_section(z: float) -> tuple[float, float]:
+    """Interpolate half-width and exponent for a section at height z."""
+    for lower, upper in zip(OUTER_SECTIONS, OUTER_SECTIONS[1:], strict=True):
+        if lower[0] <= z <= upper[0]:
+            fraction = (z - lower[0]) / (upper[0] - lower[0])
+            half_width = lower[1] + fraction * (upper[1] - lower[1])
+            exponent = lower[2] + fraction * (upper[2] - lower[2])
+            return half_width, exponent
+    raise ValueError(f"Section height {z} lies outside the body")
+
+
+def build_cup_body() -> cq.Solid:
+    """Loft the integrated pedestal, body, shoulder, and lip, then hollow it."""
+    outer_wires = [soft_square_wire(*section) for section in OUTER_SECTIONS]
+    outer = cq.Solid.makeLoft(outer_wires)
+
+    cavity_sections = []
+    base_half_width, base_exponent = interpolate_section(BASE_THICKNESS)
+    cavity_sections.append((BASE_THICKNESS, base_half_width - NOMINAL_WALL_THICKNESS, base_exponent))
+    cavity_sections.extend(
+        (z, half_width - NOMINAL_WALL_THICKNESS, exponent)
+        for z, half_width, exponent in OUTER_SECTIONS
+        if BASE_THICKNESS < z < BODY_HEIGHT
+    )
+    top_half_width, top_exponent = interpolate_section(BODY_HEIGHT)
+    cavity_sections.append(
+        (
+            BODY_HEIGHT + CAVITY_TOP_EXTENSION,
+            top_half_width - NOMINAL_WALL_THICKNESS,
+            top_exponent,
+        )
+    )
+    cavity = cq.Solid.makeLoft([soft_square_wire(*section) for section in cavity_sections])
+    return outer.cut(cavity)
+
+
+def xz_spline_wire(points: tuple[tuple[float, float], ...], y: float) -> cq.Wire:
+    """Create a periodic handle boundary in a plane normal to Y."""
+    return closed_periodic_spline([cq.Vector(x, y, z) for x, z in points])
+
+
+def build_handle() -> cq.Solid:
+    """Build the rounded, tapered-looking ribbon around a teardrop opening."""
+    front_y = -HANDLE_DEPTH / 2.0
+    outer = xz_spline_wire(HANDLE_OUTER_XZ, front_y)
+    inner = xz_spline_wire(HANDLE_INNER_XZ, front_y)
+    ribbon = cq.Solid.extrudeLinear(outer, [inner], cq.Vector(0.0, HANDLE_DEPTH, 0.0))
+    perimeter_edges = [edge for edge in ribbon.Edges() if edge.geomType() == "BSPLINE"]
+    return ribbon.fillet(HANDLE_EDGE_FILLET, perimeter_edges)
 
 
 def build_model() -> cq.Workplane:
-    """Return a hollow, single-solid Art Deco mug centred in X/Y with base at Z=0."""
-    outer_cup = (
-        cq.Workplane("XY")
-        .circle(BASE_OUTER_RADIUS)
-        .workplane(offset=BODY_HEIGHT)
-        .circle(TOP_OUTER_RADIUS)
-        .loft(combine=True)
-    )
-    inner_cup = (
-        cq.Workplane("XY")
-        .workplane(offset=BASE_THICKNESS)
-        .circle(BASE_OUTER_RADIUS - WALL_THICKNESS)
-        .workplane(offset=BODY_HEIGHT - BASE_THICKNESS)
-        .circle(TOP_OUTER_RADIUS - WALL_THICKNESS)
-        .loft(combine=True)
-    )
-    mug = outer_cup.cut(inner_cup)
-
-    # Stepped lower plinth: an Art Deco architectural silhouette which leaves
-    # the drinking cavity unobstructed.
-    lower_bottom = 0.0
-    middle_bottom = lower_bottom + LOWER_TIER_HEIGHT
-    upper_bottom = middle_bottom + MIDDLE_TIER_HEIGHT
-    mug = mug.union(octagonal_band(LOWER_TIER_OUTER_DIAMETER, TIER_INNER_RADIUS, LOWER_TIER_HEIGHT, lower_bottom))
-    mug = mug.union(octagonal_band(MIDDLE_TIER_OUTER_DIAMETER, TIER_INNER_RADIUS, MIDDLE_TIER_HEIGHT, middle_bottom))
-    mug = mug.union(octagonal_band(UPPER_TIER_OUTER_DIAMETER, TIER_INNER_RADIUS, UPPER_TIER_HEIGHT, upper_bottom))
-    mug = mug.union(octagonal_band(CROWN_OUTER_DIAMETER, CROWN_INNER_RADIUS, CROWN_HEIGHT, CROWN_BOTTOM_Z))
-
-    # Slender raised flutes provide the vertical, sunburst-like rhythm of an
-    # American Art Deco facade. Each overlaps the cup's curved wall.
-    for index in range(FLUTE_COUNT):
-        angle = index * 360.0 / FLUTE_COUNT
-        flute = box_at(FLUTE_WIDTH, FLUTE_DEPTH, FLUTE_HEIGHT, 0, -FLUTE_CENTER_RADIUS, FLUTE_CENTER_Z)
-        mug = mug.union(flute.rotate((0, 0, 0), (0, 0, 1), angle))
-
-    # A rectangular ring with modest corner rounding continues the stepped,
-    # architectural theme while preserving a generous finger opening.
-    handle_outer = box_at(
-        HANDLE_OUTER_WIDTH,
-        HANDLE_OUTER_DEPTH,
-        HANDLE_OUTER_HEIGHT,
-        HANDLE_CENTER_X,
-        0,
-        HANDLE_CENTER_Z,
-    ).edges("|Y").fillet(HANDLE_CORNER_RADIUS)
-    handle_opening = box_at(
-        HANDLE_INNER_WIDTH,
-        HANDLE_OUTER_DEPTH + 2.0,
-        HANDLE_INNER_HEIGHT,
-        HANDLE_CENTER_X,
-        0,
-        HANDLE_CENTER_Z,
-    )
-    return mug.union(handle_outer.cut(handle_opening))
+    """Return the printable one-piece mug, centred in X/Y with its base at Z=0."""
+    mug = build_cup_body().fuse(build_handle()).clean()
+    return cq.Workplane("XY").newObject([mug])

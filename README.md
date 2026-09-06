@@ -21,6 +21,18 @@ uv run python scripts/view.py output/test_plate/part.stl
 The viewer opens a VTK window. Drag to rotate, use the mouse wheel to zoom, and
 shift-drag to pan. Close the window to return to the terminal.
 
+Create deterministic review images after building:
+
+```bash
+uv run python scripts/render.py test_plate
+```
+
+This writes nine fixed views and a contact sheet under
+`output/test_plate/renders/`. Agents must ingest and critique the contact sheet;
+rendering it without visual inspection does not complete the design loop. See
+[`DESIGN_LOOP.md`](DESIGN_LOOP.md) for the required discovery, comparison, and
+iteration workflow.
+
 ## Design layout
 
 Each design lives in `designs/<design-name>/` and contains:
@@ -32,4 +44,3 @@ Each design lives in `designs/<design-name>/` and contains:
 
 Exports are written to `output/<design-name>/` and are intentionally ignored by
 Git.
-

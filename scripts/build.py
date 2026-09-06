@@ -78,18 +78,20 @@ def validate_mini_delivery_bag(model: cq.Workplane, parameters) -> list[str]:
 
     box = solid.BoundingBox()
     checks = {
-        "X width": (box.xlen, parameters.BODY_WIDTH),
+        "X finished width": (box.xlen, parameters.EXPECTED_OVERALL_WIDTH),
         "Y finished depth": (box.ylen, parameters.EXPECTED_OVERALL_DEPTH),
         "Z finished height": (box.zlen, parameters.EXPECTED_OVERALL_HEIGHT),
     }
     for name, (actual, expected) in checks.items():
         if not nearly_equal(actual, expected, parameters.DIMENSION_TOLERANCE):
             raise ValueError(f"{name} is {actual:.4f} mm; expected {expected:.4f} mm")
-    return ["valid solid", "one solid", "finished outer dimensions"]
+    if not nearly_equal(box.zmin, 0.0, parameters.DIMENSION_TOLERANCE):
+        raise ValueError(f"Print-facing base begins at Z={box.zmin:.4f} mm; expected Z=0")
+    return ["valid solid", "one solid", "finished outer dimensions", "base at Z=0"]
 
 
 def validate_aero_coffee_mug(model: cq.Workplane, parameters) -> list[str]:
-    """Validate the finished envelope and one-piece construction of the mug."""
+    """Validate the finished envelope, volume, base, and construction of the mug."""
     solid = model.val()
     if not solid.isValid():
         raise ValueError("CadQuery produced an invalid solid")
@@ -106,7 +108,57 @@ def validate_aero_coffee_mug(model: cq.Workplane, parameters) -> list[str]:
     for name, (actual, expected) in checks.items():
         if not nearly_equal(actual, expected, parameters.DIMENSION_TOLERANCE):
             raise ValueError(f"{name} is {actual:.4f} mm; expected {expected:.4f} mm")
-    return ["valid solid", "one solid", "finished outer dimensions"]
+    if not nearly_equal(box.zmin, 0.0, parameters.DIMENSION_TOLERANCE):
+        raise ValueError(f"Print-facing base begins at Z={box.zmin:.4f} mm; expected Z=0")
+    if not nearly_equal(solid.Volume(), parameters.EXPECTED_MATERIAL_VOLUME, parameters.VOLUME_TOLERANCE):
+        raise ValueError(
+            f"Material volume is {solid.Volume():.3f} mm³; "
+            f"expected {parameters.EXPECTED_MATERIAL_VOLUME:.3f} mm³"
+        )
+    return ["valid solid", "one solid", "finished outer dimensions", "base at Z=0", "material volume"]
+
+
+def validate_doordash_logo(model: cq.Workplane, parameters) -> list[str]:
+    """Validate the envelope and uniform, print-facing logo extrusion."""
+    solid = model.val()
+    if not solid.isValid():
+        raise ValueError("CadQuery produced an invalid solid")
+    solids = model.solids().vals()
+    if len(solids) != parameters.EXPECTED_SOLID_COUNT:
+        raise ValueError(f"Expected {parameters.EXPECTED_SOLID_COUNT} solid, found {len(solids)}")
+
+    box = solid.BoundingBox()
+    checks = {
+        "X overall width": (box.xlen, parameters.OVERALL_WIDTH),
+        "Y derived height": (box.ylen, parameters.EXPECTED_OVERALL_HEIGHT),
+        "Z extrusion depth": (box.zlen, parameters.EXTRUSION_DEPTH),
+        "print-facing base": (box.zmin, 0.0),
+    }
+    for name, (actual, expected) in checks.items():
+        if not nearly_equal(actual, expected, parameters.DIMENSION_TOLERANCE):
+            raise ValueError(f"{name} is {actual:.4f} mm; expected {expected:.4f} mm")
+    return ["valid solid", "one solid", "reference-derived profile envelope", "base at Z=0"]
+
+
+def validate_shure_mv6(model: cq.Workplane, parameters) -> list[str]:
+    """Validate the known reconstruction envelope and fused construction."""
+    solid = model.val()
+    if not solid.isValid():
+        raise ValueError("CadQuery produced an invalid solid")
+    solids = model.solids().vals()
+    if len(solids) != parameters.EXPECTED_SOLID_COUNT:
+        raise ValueError(f"Expected {parameters.EXPECTED_SOLID_COUNT} solid, found {len(solids)}")
+    box = solid.BoundingBox()
+    checks = {
+        "X microphone length": (box.xlen, parameters.EXPECTED_OVERALL_WIDTH),
+        "Y base diameter": (box.ylen, parameters.EXPECTED_OVERALL_DEPTH),
+        "Z mounted height": (box.zlen, parameters.EXPECTED_OVERALL_HEIGHT),
+        "print-facing base": (box.zmin, 0.0),
+    }
+    for name, (actual, expected) in checks.items():
+        if not nearly_equal(actual, expected, parameters.DIMENSION_TOLERANCE):
+            raise ValueError(f"{name} is {actual:.4f} mm; expected {expected:.4f} mm")
+    return ["valid solid", "one solid", "user-refined envelope", "base at Z=0"]
 
 
 def main() -> None:
@@ -133,6 +185,10 @@ def main() -> None:
         results = validate_mini_delivery_bag(model, parameters)
     elif args.design == "aero_coffee_mug":
         results = validate_aero_coffee_mug(model, parameters)
+    elif args.design == "doordash_logo":
+        results = validate_doordash_logo(model, parameters)
+    elif args.design == "shure_mv6":
+        results = validate_shure_mv6(model, parameters)
     else:
         solid = model.val()
         if not solid.isValid() or len(model.solids().vals()) != 1:

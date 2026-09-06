@@ -1,35 +1,68 @@
-# Miniature bicycle delivery bag
+# DoorDash courier-bag miniature
 
-## Purpose
+## Original request
 
-A closed miniature DoorDash-style insulated delivery backpack for decorative
-3D printing. Its front carries raised `DOORDASH` lettering, fused into the
-front flap rather than applied as a paint texture.
+Create a cool, true-to-form miniature of the DoorDash delivery backpack shown
+on a cyclist in the supplied photograph. The DoorDash mark and lettering must
+stand slightly proud of the bag. The user authorised artistic inference for
+unseen surfaces and requested simplified, toy-like shoulder straps.
+
+## Brief Gate
+
+- Purpose: a decorative, printable miniature rather than functional luggage.
+- Reference character: tall red insulated courier box; lightly faceted fabric
+  panels; black perimeter piping; shallow top flap; broad rear-facing wordmark
+  panel; large side logo.
+- Fixed cues: box-backpack proportions, sloped lower panel, contrasting seam
+  layout, raised DoorDash logo and lettering.
+- Inferred cues: padded rider-facing panel, paired shoulder loops, and a compact
+  top carry loop, because those areas are obscured in the supplied photograph.
+- Artistic freedom: soften the hard box into a friendly collectible/toy while
+  keeping the recognisable professional courier-bag construction.
+- Manufacturing assumption: one-piece display solid suitable for printing;
+  colour separation is represented by raised geometry, not material assignments.
+- Acceptance criteria: recognisable as the photographed bag from front/side;
+  credible but simple back; deliberate seams rather than an undecorated box;
+  legible raised branding; one valid solid.
+
+The single photograph establishes the intended form direction, so divergent
+concept variants are unnecessary. Hidden construction remains an explicit
+designer inference rather than a claim about the commercial product.
 
 ## Exact design dimensions
 
-- Main bag body: 70 mm wide × 39.5 mm deep × 80 mm high.
-- The front flap and rear strap relief together add 3.2 mm beyond the body
-  after their 0.4 mm fusion overlaps, making the finished depth 42.7 mm.
-- Raised top handle adds 7.6 mm beyond the body after its 0.4 mm fusion
-  overlap, making the finished overall height 87.6 mm.
-- Vertical body corner radius: 4 mm.
+All dimensions are millimetres.
 
-## Derived dimensions
+- Main case: 76 wide x 50 deep x 78 high.
+- Main vertical corner radius: 4.0.
+- Lower and upper edge chamfers: 7.0 and 2.5 respectively.
+- Soft top flap: 78 x 52 x 3, centred at Z=78.
+- Front branded panel: Z=22 to 74, tapering from 70 to 67 wide; 2.2 thick.
+- Front piping diameter: 2.4; top piping diameter: 1.8; side piping diameter: 2.0.
+- Raised front and side logo projection: approximately 1.7 and 1.4 beyond the
+  adjacent panel after intentional fusion overlap.
+- Raised wordmark thickness: 2.5 with approximately 1.7 visible projection.
+- Shoulder-loop tube diameter: 4.4; carry-loop tube diameter: 3.2.
+- Finished derived envelope including straps, piping, branding, and handle:
+  **78.400 wide x 62.121 deep x 88.481 high**.
 
-- Front flap and rear strap positions are centred from the body dimensions.
-- Front-panel band widths are 62% of the flap width.
+## Image-based inferences
 
-## Inferred / stylistic decisions
+- The photograph provides no physical scale. A hand-sized 70 mm main width is
+  a designer assumption, not a measurement.
+- The front panel heights, lower kick, flap thickness, piping diameters, and
+  unseen back geometry are inferred from perspective and typical courier-bag
+  construction; they are not measured product specifications.
+- The supplied photograph shows fabric wrinkles. These are expressed through
+  panel breaks, piping, taper, and soft edge treatment rather than literal
+  irregular surface noise, which would weaken the miniature and obscure form.
+- The DoorDash mark profile is reconstructed from the separately supplied logo
+  raster and is not claimed to be the original brand vector artwork.
 
-- The closed rectangular insulated-bag form, flap proportions, rear straps,
-  handle, and wordmark placement are aesthetic choices rather than measured
-  dimensions from a particular real bag.
-- The raised wordmark is 0.9 mm thick with 0.4 mm embedded in the flap; it
-  therefore projects 0.5 mm. Rear straps are 1.5 mm thick.
+## Print and safety notes
 
-## Print notes
-
-- The design is a display miniature, not a functional insulated bag.
-- It is designed to stand on its flat base. The protruding top handle may need
-  support depending on the printer and slicer settings.
+- Intended upright display orientation places the flat bag base on Z=0.
+- The rear shoulder loops and top handle may require supports. They are cosmetic
+  toy-like forms, not load-bearing straps.
+- This miniature is not wearable, insulated, food-contact rated, or intended to
+  reproduce the real product's structural performance.
